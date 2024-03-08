@@ -18,32 +18,32 @@ import java.util.ArrayList;
 @Service
 public class JWTUserDetailsServiceImpl implements ReactiveUserDetailsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+        private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Override
-    public Mono<UserDetails> findByUsername(String email) {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        return userRepository.findByEmail(email)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new UsernameNotFoundException(
-                        "El usuario con el correo electrónico " + email + " no existe"))))
-                .map(user -> {
-                    if (user == null) {
-                        logger.error(String.format(
-                                "Error en la autenticación: no existe el usuario con correo electrónico %s",
-                                email));
-                        throw new UsernameNotFoundException(
-                                "Error en la autenticación: no existe el usuario con correo electrónico "
-                                        + email + " en el sistema");
-                    }
-                    return org.springframework.security.core.userdetails.User.builder()
-                            .username(user.getEmail())
-                            .password(user.getContrasena())
-                            .authorities(authorities)
-                            .build();
-                });
-    }
+        @Override
+        public Mono<UserDetails> findByUsername(String email) {
+                List<GrantedAuthority> authorities = new ArrayList<>();
+                return userRepository.findByEmail(email)
+                                .switchIfEmpty(Mono.defer(() -> Mono.error(new UsernameNotFoundException(
+                                                "El usuario con el correo electrónico " + email + " no existe"))))
+                                .map(user -> {
+                                        if (user == null) {
+                                                logger.error(String.format(
+                                                                "Error en la autenticación: no existe el usuario con correo electrónico %s",
+                                                                email));
+                                                throw new UsernameNotFoundException(
+                                                                "Error en la autenticación: no existe el usuario con correo electrónico "
+                                                                                + email + " en el sistema");
+                                        }
+                                        return org.springframework.security.core.userdetails.User.builder()
+                                                        .username(user.getEmail())
+                                                        .password(user.getPassword())
+                                                        .authorities(authorities)
+                                                        .build();
+                                });
+        }
 
 }

@@ -12,8 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import universidad.ecommerce_universitario_mysql_webflux.dto.TokenAndUserData;
 import universidad.ecommerce_universitario_mysql_webflux.exception.CustomException;
+import universidad.ecommerce_universitario_mysql_webflux.request.AuthRequest;
+import universidad.ecommerce_universitario_mysql_webflux.response.AuthResponse;
 import universidad.ecommerce_universitario_mysql_webflux.security.config.JWTAuthResponse;
 import universidad.ecommerce_universitario_mysql_webflux.security.config.JWTUtil;
+import universidad.ecommerce_universitario_mysql_webflux.security.config.PBKDF2Encoder;
 import universidad.ecommerce_universitario_mysql_webflux.security.config.WebSecurityConfig;
 import universidad.ecommerce_universitario_mysql_webflux.service.UserService;
 
@@ -29,40 +32,16 @@ public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    private final UserService userService;
-
     private JWTUtil jwtUtil;
-
-    private PasswordEncoder passwordEncoder;
+    private PBKDF2Encoder passwordEncoder;
+    private UserService userService;
 
     @PostMapping("/api/auth")
-    public Mono<ResponseEntity<TokenAndUserData>> login(@RequestBody JWTAuthResponse ar) {
-        logger.info("Entre al  metodo de autenticacion");
-        String username = ar.getEmail();
-        String contrasena = ar.getContrasena();
-
-        logger.info(username + " Contraseña a validar");
-        logger.info(contrasena + " Contraseña a validar");
-
-        Base64.Decoder decoder = Base64.getDecoder();
-        String passwordAux = ar.getContrasena();
-        logger.info(passwordAux);
-
-        return userService.obtenerUsuarioPorCorreo(username)
-                .filter(user -> passwordEncoder.matches(passwordAux, user.getContrasena()))
-                .map(user -> {
-                    String token = jwtUtil.generateToken(user);
-                    Boolean tokenizacion = jwtUtil.validateToken(token);
-                    logger.info("El valor de la contrasena es: {}", passwordAux);
-                    logger.info("El valor del token es: {}", token);
-                    // System.out.println(tokenizacion);
-                    // Crear un objeto TokenAndUserData con el token y los datos del usuario
-                    TokenAndUserData tokenAndUserData = new TokenAndUserData(HttpStatus.OK, token);
-                    tokenAndUserData.setData(user); // Configura los datos del usuario
-
-                    return ResponseEntity.ok(tokenAndUserData);
-                })
-                .switchIfEmpty(Mono.error(new CustomException(HttpStatus.BAD_REQUEST, "Invalid credentials")));
+    public Mono<ResponseEntity<AuthResponse>> login(@RequestBody AuthRequest ar) {
+        return userService.findByUsername(ar.getUsername())
+                .filter(userDetails -> passwordEncoder.encode(ar.getPassword()).equals(userDetails.getPassword()))
+                .map(userDetails -> ResponseEntity.ok(new AuthResponse(jwtUtil.generateToken(userDetails))))
+                .switchIfEmpty(Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()));
     }
 
 }

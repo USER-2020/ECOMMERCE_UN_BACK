@@ -12,29 +12,30 @@ import lombok.AllArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
-
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
 public class JWTAuthenticationManager implements ReactiveAuthenticationManager {
 
-    @Autowired
     private JWTUtil jwtUtil;
 
     @Override
+    @SuppressWarnings("unchecked")
     public Mono<Authentication> authenticate(Authentication authentication) {
         String authToken = authentication.getCredentials().toString();
+        String username = jwtUtil.getUsernameFromToken(authToken);
         return Mono.just(jwtUtil.validateToken(authToken))
                 .filter(valid -> valid)
                 .switchIfEmpty(Mono.empty())
                 .map(valid -> {
                     Claims claims = jwtUtil.getAllClaimsFromToken(authToken);
-                    String role = claims.get("role", String.class);
-
+                    List<String> rolesMap = claims.get("role", List.class);
                     return new UsernamePasswordAuthenticationToken(
-                            authentication.getPrincipal(),
+                            username,
                             null,
-                            Collections.singletonList(new SimpleGrantedAuthority(role)));
+                            rolesMap.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
                 });
     }
 }
