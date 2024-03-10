@@ -4,7 +4,9 @@ import org.springframework.http.HttpStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Date;
@@ -17,6 +19,7 @@ public class JWTAuthResponse {
     private int id_user;
     private String username;
     private String password;
+    private String email;
     private String role;
     private Boolean activo;
     private String token;

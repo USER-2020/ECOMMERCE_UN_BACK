@@ -20,46 +20,6 @@ import java.util.Collections;
 
 public interface UserService {
 
-    // private Map<String, User> data;
-
-    // private final UserRepository userRepository;
-
-    // @PostConstruct
-    // public void init() {
-    // data = new HashMap<>();
-
-    // data.put("user", new User(
-    // 1, // ID del usuario
-    // "user", // Nombre de usuario
-    // "user@example.com", // Correo electrónico
-    // "hashedPassword", // Contraseña
-    // Collections.singleton(Role.ROLE_USER), // Conjunto de roles
-    // true, // Activo
-    // "User Address", // Dirección
-    // "9876543210", // Número de teléfono
-    // LocalDate.now() // Fecha de ingreso
-    // ));
-
-    // data.put("admin", new User(
-    // 2, // ID del usuario
-    // "admin", // Nombre de usuario
-    // "admin@example.com", // Correo electrónico
-    // "hashedPassword", // Contraseña
-    // Collections.singleton(Role.ROLE_ADMIN), // Conjunto de roles
-    // true, // Activo
-    // "Admin Address", // Dirección
-    // "1234567890", // Número de teléfono
-    // LocalDate.now() // Fecha de ingreso
-    // ));
-
-    // }
-
-    // public Mono<User> findByUsername(String username) {
-    // return Mono.justOrEmpty(data.get(username));
-    // }
-    // public Mono<User>findByUsername (String username){
-    // return userRepository.
-    // }
     public Flux<User> obtenerUsuarios();
 
     public Mono<User> obtenerUsuarioPorId(int id);
