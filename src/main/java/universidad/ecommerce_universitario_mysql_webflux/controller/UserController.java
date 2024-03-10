@@ -83,13 +83,13 @@ public class UserController {
                                 LocalDateTime.now().toString(),
                                 "/api/auth",
                                 status.value(),
-                                "Internal Server Error",
+                                "Invalid c",
                                 "your-request-id", // customize as needed
                                 e.getMessage());
 
                         // Convert AuthErrorResponse to TokenAndUserData (or create a new
                         // TokenAndUserData)
-                        TokenAndUserData tokenAndUserData = new TokenAndUserData(HttpStatus.INTERNAL_SERVER_ERROR,
+                        TokenAndUserData tokenAndUserData = new TokenAndUserData(HttpStatus.BAD_REQUEST,
                                 "Invalid Credentials");
 
                         return Mono.just(ResponseEntity.status(status).body(tokenAndUserData));
@@ -106,11 +106,11 @@ public class UserController {
 
                         // Convert AuthErrorResponse to TokenAndUserData (or create a new
                         // TokenAndUserData)
-                        TokenAndUserData tokenAndUserData = new TokenAndUserData(HttpStatus.INTERNAL_SERVER_ERROR,
+                        TokenAndUserData tokenAndUserData = new TokenAndUserData(HttpStatus.BAD_REQUEST,
                                 "Invalid Credentials");
 
                         return Mono
-                                .just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(tokenAndUserData));
+                                .just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(tokenAndUserData));
                     }
                 });
 
