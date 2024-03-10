@@ -29,7 +29,7 @@ public class JWTFilter implements WebFilter {
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 		ServerHttpRequest request = exchange.getRequest();
 		String path = request.getPath().value();
-		if (path.contains("/api/auth") || path.contains("/api/users/crear") || path.contains("/api/email/send") || path.contains("/api/email/send-html"))
+		if (path.contains("/api/auth") || path.contains("/api/register") || path.contains("/api/email/send") || path.contains("/api/email/send-html"))
 			return chain.filter(exchange);
 		String auth = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 		if (auth == null)

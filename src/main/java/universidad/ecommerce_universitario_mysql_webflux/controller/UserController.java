@@ -1,23 +1,32 @@
 package universidad.ecommerce_universitario_mysql_webflux.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import universidad.ecommerce_universitario_mysql_webflux.dto.TokenAndUserData;
+import universidad.ecommerce_universitario_mysql_webflux.entity.User;
 import universidad.ecommerce_universitario_mysql_webflux.exception.CustomException;
 import universidad.ecommerce_universitario_mysql_webflux.response.AuthErrorResponse;
+import universidad.ecommerce_universitario_mysql_webflux.response.AuthResponse;
 import universidad.ecommerce_universitario_mysql_webflux.security.config.JWTAuthResponse;
 import universidad.ecommerce_universitario_mysql_webflux.security.config.JWTUtil;
 import universidad.ecommerce_universitario_mysql_webflux.security.config.PBKDF2Encoder;
@@ -33,6 +42,13 @@ public class UserController {
     private final JWTUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
+
+    // public UserController(JWTUtil jwtUtil, PasswordEncoder passwordEncoder,
+    // UserService userService) {
+    // this.jwtUtil = jwtUtil;
+    // this.passwordEncoder = passwordEncoder;
+    // this.userService = userService;
+    // }
 
     @PostMapping("/api/auth")
     public Mono<ResponseEntity<TokenAndUserData>> login(@RequestBody JWTAuthResponse ar) {
@@ -114,6 +130,76 @@ public class UserController {
                     }
                 });
 
+    }
+
+    @PostMapping("/api/register")
+    public Mono<ResponseEntity<TokenAndUserData>> register(@RequestBody JWTAuthResponse authRequest,
+            @RequestParam(name = "role", defaultValue = "ROLE_ADMIN") String role) {
+
+        // Create a new user object from the registration request
+        User newUser = createUserFromAuthRequest(authRequest, role);
+
+        return userService.existsByUsernameOrEmail(newUser.getUsername(), newUser.getEmail())
+                .flatMap(userExists -> {
+                    if (userExists) {
+                        // If the user already exists, return a custom error response
+                        AuthErrorResponse authErrorResponse = new AuthErrorResponse(
+                                LocalDateTime.now().toString(),
+                                "/api/register",
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Bad Request",
+                                "your-request-id", // customize as needed
+                                "El usuario ya existe.");
+
+                        TokenAndUserData tokenAndUserData = new TokenAndUserData(HttpStatus.BAD_REQUEST,
+                                "El usuario ya existe");
+
+                        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(tokenAndUserData));
+                    } else {
+                        // If the user doesn't exist, proceed with user creation
+                        String encodedPassword = passwordEncoder.encode(newUser.getPassword());
+                        newUser.setPassword(encodedPassword);
+
+                        return userService.guardarUsuario(newUser)
+                                .flatMap(savedUser -> {
+                                    // User created successfully, generate a token
+                                    String token = jwtUtil.generateToken(savedUser);
+
+                                    // Create a response object with the token and user data
+                                    TokenAndUserData response = new TokenAndUserData(HttpStatus.OK, token);
+                                    response.setData(savedUser); // Set user data
+
+                                    // Return a success response with the token
+                                    return Mono.just(ResponseEntity.ok(response));
+                                })
+                                .onErrorResume(CustomException.class, ex -> {
+                                    // If a CustomException occurs during user creation, return it in the response.
+                                    AuthErrorResponse authErrorResponse = new AuthErrorResponse(
+                                            LocalDateTime.now().toString(),
+                                            "/api/register",
+                                            ex.getStatus().value(),
+                                            "Bad Request",
+                                            "your-request-id", // customize as needed
+                                            ex.getMessage());
+
+                                    TokenAndUserData tokenAndUserData = new TokenAndUserData(HttpStatus.BAD_REQUEST,
+                                            "Invalid Credentials");
+
+                                    return Mono.just(ResponseEntity.status(ex.getStatus()).body(tokenAndUserData));
+                                });
+                    }
+                });
+    }
+
+    private User createUserFromAuthRequest(JWTAuthResponse authRequest, String role) {
+        User newUser = new User();
+        newUser.setUsername(authRequest.getUsername());
+        newUser.setPassword(authRequest.getPassword()); // Asegúrate de manejar la encriptación adecuada aquí
+        newUser.setEmail(authRequest.getEmail()); // Puedes ajustar esto según tus necesidades
+        newUser.setRole(role);
+        // Configura otros campos según sea necesario
+
+        return newUser;
     }
 
 }
