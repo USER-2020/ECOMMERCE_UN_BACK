@@ -14,11 +14,15 @@ import org.springframework.web.server.ServerWebExchange;
 import lombok.AllArgsConstructor;
 import reactor.core.publisher.Mono;
 
-@AllArgsConstructor
+
 @Component
 public class JJWTSecurityContextRepository implements ServerSecurityContextRepository {
 
     private JWTAuthenticationManager authenticationManager;
+
+    public JJWTSecurityContextRepository(JWTAuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+    }
 
     @Override
     public Mono<Void> save(ServerWebExchange swe, SecurityContext sc) {
@@ -26,15 +30,13 @@ public class JJWTSecurityContextRepository implements ServerSecurityContextRepos
     }
 
     @Override
-    public Mono<SecurityContext> load(ServerWebExchange swe) {
-        return Mono.justOrEmpty(swe.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION))
+    public Mono<SecurityContext> load(ServerWebExchange exchange) {
+        return Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION))
                 .filter(authHeader -> authHeader.startsWith("Bearer "))
                 .flatMap(authHeader -> {
-                    String authToken = authHeader.substring(7);
+                    String authToken = authHeader.substring(7);// Cadena de caracteres que corresponde a Bearer + ""
                     Authentication auth = new UsernamePasswordAuthenticationToken(authToken, authToken);
-                    return Mono.just(auth)
-                            .flatMap(this.authenticationManager::authenticate)
-                            .map(authentication -> new SecurityContextImpl(authentication));
+                    return this.authenticationManager.authenticate(auth).map(SecurityContextImpl::new);
                 });
     }
 

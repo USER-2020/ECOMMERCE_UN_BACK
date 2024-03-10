@@ -5,13 +5,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
 import universidad.ecommerce_universitario_mysql_webflux.entity.User;
 
 @Component
@@ -49,7 +50,7 @@ public class JWTUtil {
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getRoles());
+        claims.put("role", user.getRole());
         return doGenerateToken(claims, user.getUsername());
     }
 

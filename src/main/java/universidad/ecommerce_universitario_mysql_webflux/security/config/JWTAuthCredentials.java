@@ -10,6 +10,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class JWTAuthCredentials {
-    private String correo_electronico;
-    private String constrasena;
+    private String usernameOrEmail;
+	private String password;
 }

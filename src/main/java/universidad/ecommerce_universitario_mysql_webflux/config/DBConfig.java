@@ -26,10 +26,10 @@ public class DBConfig extends AbstractR2dbcConfiguration{
         ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer();
         initializer.setConnectionFactory(connectionFactory);
         /* Esto es para ejecutar codigo SQL y enviar los datos de las tablas si es necesario */
-        // CompositeDatabasePopulator populator = new CompositeDatabasePopulator();
-		// populator.addPopulators(new ResourceDatabasePopulator(new ClassPathResource("DBTables_create.sql")));
-		// populator.addPopulators(new ResourceDatabasePopulator(new ClassPathResource("prueba.sql")));
-		// initializer.setDatabaseCleaner(populator);
+        CompositeDatabasePopulator populator = new CompositeDatabasePopulator();
+		populator.addPopulators(new ResourceDatabasePopulator(new ClassPathResource("DBTables_create.sql")));
+		populator.addPopulators(new ResourceDatabasePopulator(new ClassPathResource("prueba.sql")));
+		initializer.setDatabaseCleaner(populator);
         return initializer;
     }
     

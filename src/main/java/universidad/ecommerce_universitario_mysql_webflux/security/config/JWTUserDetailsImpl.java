@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,75 +17,69 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
 public class JWTUserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
+    private final String id;
+    private final String username;
+    private final String password;
+    private final Collection<? extends GrantedAuthority> authorities;
 
-    private String username;
+    public JWTUserDetailsImpl(String id, String username, String password,
+            Collection<? extends GrantedAuthority> authorities) {
+        super();
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.authorities = authorities;
+        // TODO Auto-generated constructor stub
+    }
 
-    private String password;
-
-    @Getter
-    @Setter
-    private Boolean enabled;
-
-    @Getter
-    @Setter
-    private List<Role> roles;
+    // private final Collection<? extends GrantedAuthority> authorities;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // TODO Auto-generated method stub
-        return this.roles.stream().map(authority -> new SimpleGrantedAuthority(authority.name()))
-                .collect(Collectors.toList());
+        return this.authorities;
     }
 
     @JsonIgnore
+    public String getId() {
+        return this.id;
+    }
+
     @Override
     public String getPassword() {
         // TODO Auto-generated method stub
-        return password;
-    }
-
-    @JsonProperty
-    public void setPassword(String password) {
-        this.password = password;
+        return this.password;
     }
 
     @Override
     public String getUsername() {
         // TODO Auto-generated method stub
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+        return this.username;
     }
 
     @Override
     public boolean isAccountNonExpired() {
         // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
         // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
         // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
         // TODO Auto-generated method stub
-        return this.enabled;
+        return true;
     }
 
 }

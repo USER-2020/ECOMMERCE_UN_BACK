@@ -31,30 +31,41 @@ import reactor.core.publisher.Mono;
 @EnableReactiveMethodSecurity
 public class WebSecurityConfig {
 
+        @Autowired
         private JWTAuthenticationManager authenticationManager;
+
+        @Autowired
         private JJWTSecurityContextRepository securityContextRepository;
+
+        @Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
         @Bean
         public SecurityWebFilterChain securitygWebFilterChain(ServerHttpSecurity http) {
                 return http
                                 .exceptionHandling()
-                                .authenticationEntryPoint(
-                                                (swe, e) -> Mono.fromRunnable(() -> swe.getResponse()
-                                                                .setStatusCode(HttpStatus.UNAUTHORIZED)))
-                                .accessDeniedHandler(
-                                                (swe, e) -> Mono.fromRunnable(() -> swe.getResponse()
-                                                                .setStatusCode(HttpStatus.FORBIDDEN)))
                                 .and()
-                                .csrf(csrf -> csrf.csrfTokenRepository(
-                                                CookieServerCsrfTokenRepository.withHttpOnlyFalse()))
-                                .formLogin().disable()
-                                .httpBasic().disable()
                                 .authenticationManager(authenticationManager)
                                 .securityContextRepository(securityContextRepository)
                                 .authorizeExchange()
                                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
                                 .pathMatchers("/api/auth").permitAll()
-                                .anyExchange().authenticated()
-                                .and().build();
+                                .pathMatchers("/api/register").permitAll()
+                                // .pathMatchers("/api/email/send").permitAll()
+                                // .pathMatchers("/api/email/send-html").permitAll()
+                                // .pathMatchers("/api/motosV2").permitAll()
+                                // .pathMatchers("/api/motosV2/marca/{marca}").permitAll()
+                                // .pathMatchers("/api/tusmotos").permitAll()
+                                // .pathMatchers("/api/users/{id}").permitAll()
+                                .pathMatchers("/**").hasRole("ADMIN")// Permitir acceso sin autenticación a "/api/auth"
+                                .anyExchange().authenticated() // Requerir autenticación para cualquier otro endpoint
+                                .and()
+                                .httpBasic().disable()
+                                // .and()
+                                // .httpBasicWithDefaults()
+                                .csrf().disable()
+                                .build();
         }
 }
