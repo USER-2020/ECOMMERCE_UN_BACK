@@ -53,13 +53,7 @@ public class WebSecurityConfig {
                                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
                                 .pathMatchers("/api/auth").permitAll()
                                 .pathMatchers("/api/register").permitAll()
-                                // .pathMatchers("/api/email/send").permitAll()
-                                // .pathMatchers("/api/email/send-html").permitAll()
-                                // .pathMatchers("/api/motosV2").permitAll()
-                                // .pathMatchers("/api/motosV2/marca/{marca}").permitAll()
-                                // .pathMatchers("/api/tusmotos").permitAll()
-                                // .pathMatchers("/api/users/{id}").permitAll()
-                                .pathMatchers("/**").hasRole("ADMIN")// Permitir acceso sin autenticación a "/api/auth"
+                                .pathMatchers("/api/users/admin/**").hasRole("ADMIN")// Permitir acceso sin autenticación a "/api/auth"
                                 .anyExchange().authenticated() // Requerir autenticación para cualquier otro endpoint
                                 .and()
                                 .httpBasic().disable()

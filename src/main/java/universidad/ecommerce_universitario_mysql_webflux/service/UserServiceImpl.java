@@ -36,9 +36,9 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public Mono<User> obtenerUsuarioPorId(int id) {
+    public Mono<User> obtenerUsuarioPorId(int id_usuario) {
         // TODO Auto-generated method stub
-        return userRepository.findById(id);
+        return userRepository.findById(id_usuario);
     }
 
     @Override
