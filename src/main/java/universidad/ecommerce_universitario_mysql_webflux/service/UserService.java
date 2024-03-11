@@ -22,7 +22,7 @@ public interface UserService {
 
     public Flux<User> obtenerUsuarios();
 
-    public Mono<User> obtenerUsuarioPorId(int id);
+    public Mono<User> obtenerUsuarioPorId(int id_usuario);
 
     public Mono<User> obtenerUsuarioPorNombre(String username);
 

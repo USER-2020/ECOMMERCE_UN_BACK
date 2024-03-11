@@ -197,6 +197,8 @@ public class UserController {
         newUser.setPassword(authRequest.getPassword()); // Asegúrate de manejar la encriptación adecuada aquí
         newUser.setEmail(authRequest.getEmail()); // Puedes ajustar esto según tus necesidades
         newUser.setRole(role);
+        newUser.setActivo(true);
+        newUser.setFecha_ingreso(LocalDate.now());
         // Configura otros campos según sea necesario
 
         return newUser;
