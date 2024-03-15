@@ -1,4 +1,5 @@
 # ECOMMERCE_UN_BACK
+
 <p align="center">
 <a href="https://spring.io" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Spring_Framework_Logo_2018.svg/800px-Spring_Framework_Logo_2018.svg.png" width="250"></a>
 <a href="https://www.apachefriends.org/download.html" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Xampp_logo.svg/2560px-Xampp_logo.svg.png" width="250"></a>
@@ -7,9 +8,9 @@
 </p>
 
 
-# APIREST APP MOTEROS
 
-Aplicacion de API-REST para manejo de aplicativo de servicios de motos, utilizaremos lo siguiente para el funcionamiento de nuestro entorno local:
+
+Aplicacion de API-REST para manejo de aplicativo de servicios de un comercio electrónico, utilizaremos lo siguiente para el funcionamiento de nuestro entorno local:
 
 ## SpringBoot
 
