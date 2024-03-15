@@ -43,6 +43,8 @@ public class User {
 	@Setter
     private String role;
 
+    @Getter
+	@Setter
     private Boolean activo;
 
     private String direccion;
