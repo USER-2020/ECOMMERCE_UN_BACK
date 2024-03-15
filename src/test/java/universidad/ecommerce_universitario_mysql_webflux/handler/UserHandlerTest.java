@@ -1,5 +1,8 @@
 package universidad.ecommerce_universitario_mysql_webflux.handler;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,7 +45,11 @@ public class UserHandlerTest {
     void setUp() {
         // Mock del UserService
         when(userService.guardarUsuario(any(User.class)))
-                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+                .thenAnswer(invocation -> {
+                    User savedUser = invocation.getArgument(0);
+                    savedUser.setId_usuario(1); // Simulando que la base de datos asigna un ID
+                    return Mono.just(savedUser);
+                });
     }
 
     @Test
@@ -58,6 +65,20 @@ public class UserHandlerTest {
         testUser.setNumero_telefono("123456789");
         testUser.setFecha_ingreso(LocalDate.now());
 
+        System.out.println("Usuario formato: " + testUser.toString());
+
+        // Simular el comportamiento del servicio UserService
+        when(userService.guardarUsuario(any(User.class)))
+                .thenAnswer(invocation -> {
+                    System.out.println("Método guardarUsuario invocado");
+
+                    User user = invocation.getArgument(0);
+                    // Simular la asignación de ID por la base de datos
+                    user.setId_usuario(1); // Supongamos que el ID asignado es 1
+                    System.out.println("Id del usuario" + user.getId_usuario());
+                    return Mono.just(user);
+                });
+
         // Realizar la solicitud POST al endpoint
         webTestClient.post().uri("/api/users/admin/crear")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -67,6 +88,11 @@ public class UserHandlerTest {
                 .expectBody(User.class)
                 .value(user -> {
                     // Verificar que los campos se establecen correctamente
+                    if (user != null) {
+                        assertEquals(1, user.getId_usuario()); // Verifica el ID asignado
+                    } else {
+                        fail("El usuario devuelto es nulo");
+                    }
                     assert user.getUsername().equals(testUser.getUsername());
                     assert user.getEmail().equals(testUser.getEmail());
                     assert user.getPassword().equals(testUser.getPassword());
@@ -78,24 +104,23 @@ public class UserHandlerTest {
                 });
     }
 
+    // @Test
+    // void testDeleteUser() {
 
-    @Test
-    void testDeleteUser() {
+    // }
 
-    }
+    // @Test
+    // void testGetAll() {
 
-    @Test
-    void testGetAll() {
+    // }
 
-    }
+    // @Test
+    // void testGetUserById() {
 
-    @Test
-    void testGetUserById() {
+    // }
 
-    }
+    // @Test
+    // void testUpdateUser() {
 
-    @Test
-    void testUpdateUser() {
-
-    }
+    // }
 }
