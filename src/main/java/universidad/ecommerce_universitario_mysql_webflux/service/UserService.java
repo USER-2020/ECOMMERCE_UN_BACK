@@ -30,6 +30,8 @@ public interface UserService {
 
     public Mono<Void> eliminarUsuario(User user);
 
+    public Mono<User> obtenerUsuarioPorNombreOEmail(String username, String email);
+
     public Mono<Boolean> existsByUsernameOrEmail(String username, String email);
 
 }

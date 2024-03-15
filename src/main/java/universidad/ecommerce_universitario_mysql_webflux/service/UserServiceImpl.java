@@ -12,10 +12,9 @@ import universidad.ecommerce_universitario_mysql_webflux.repository.UserReposito
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
 
     @Override
     public Mono<Void> eliminarUsuario(User user) {
@@ -52,5 +51,11 @@ public class UserServiceImpl implements UserService{
         // TODO Auto-generated method stub
         return userRepository.findAll();
     }
-    
+
+    @Override
+    public Mono<User> obtenerUsuarioPorNombreOEmail(String username, String email) {
+        // TODO Auto-generated method stub
+        return userRepository.findByUsernameOrEmail(username, email);
+    }
+
 }

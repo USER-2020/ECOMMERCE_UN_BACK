@@ -9,6 +9,7 @@ import universidad.ecommerce_universitario_mysql_webflux.entity.User;
 
 @Repository
 public interface UserRepository extends ReactiveCrudRepository<User, Integer> {
+    
     Mono<User> findByUsernameOrEmail(String username, String email);
 
     Mono<Boolean> existsByUsernameOrEmail(String username, String email);

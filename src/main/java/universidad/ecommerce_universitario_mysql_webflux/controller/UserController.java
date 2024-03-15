@@ -62,7 +62,7 @@ public class UserController {
 
         // Implementa lógica adicional de decodificación aquí si es necesario
 
-        return userService.obtenerUsuarioPorNombre(usernameOrEmail)
+        return userService.obtenerUsuarioPorNombreOEmail(usernameOrEmail, usernameOrEmail)
                 .doOnNext(user -> {
                     // Registro de información para verificar si se encuentra el usuario
                     logger.info("Usuario encontrado en la base de datos: {}",
