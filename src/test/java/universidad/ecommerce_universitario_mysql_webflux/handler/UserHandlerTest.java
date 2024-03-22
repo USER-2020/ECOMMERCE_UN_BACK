@@ -9,12 +9,16 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.reactive.function.server.MockServerRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,13 +30,14 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import universidad.ecommerce_universitario_mysql_webflux.entity.User;
+import universidad.ecommerce_universitario_mysql_webflux.response.UserResponse;
 import universidad.ecommerce_universitario_mysql_webflux.service.UserService;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
 public class UserHandlerTest {
 
-    @Mock
+    @Autowired
     private WebTestClient webTestClient;
 
     @Mock
@@ -41,66 +46,40 @@ public class UserHandlerTest {
     @InjectMocks
     private UserHandler userHandler;
 
+    String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9BRE1JTiIsInN1YiI6Ik5vbWJyZVVzdWFyaW8iLCJpYXQiOjE3MTEwNTkyNTIsImV4cCI6MTcxMTA4ODA1Mn0._WdlIxfKzF-ZQu699bq9Y8ySAuHrR0qxgl6SJYcHv1ItzH4tFxnx_P7pvgU0ChHpkDgTUo6h-Lrs6yEzy6PEIg";
+
     @BeforeEach
     void setUp() {
-        // Mock del UserService
+        // Configurar el mock del servicio para devolver un Mono<User> con un usuario simulado
         when(userService.guardarUsuario(any(User.class)))
                 .thenAnswer(invocation -> {
-                    User savedUser = invocation.getArgument(0);
-                    savedUser.setId_usuario(1); // Simulando que la base de datos asigna un ID
-                    return Mono.just(savedUser);
+                    User user = invocation.getArgument(0);
+                    // Simular la respuesta del servicio con el usuario guardado
+                    return Mono.just(user);
                 });
     }
 
     @Test
     void testCreateUser() {
-        // Datos de prueba para el usuario
+        // Arrange
         User testUser = new User();
-        testUser.setUsername("testUser");
-        testUser.setEmail("test@example.com");
+        testUser.setUsername("testUserPrueba45");
+        testUser.setEmail("testPrueba656@example.com");
         testUser.setPassword("password123");
-        testUser.setRole("ROLE_USER");
-        testUser.setActivo(true);
-        testUser.setDireccion("Calle Principal");
-        testUser.setNumero_telefono("123456789");
-        testUser.setFecha_ingreso(LocalDate.now());
 
-        System.out.println("Usuario formato: " + testUser.toString());
-
-        // Simular el comportamiento del servicio UserService
-        when(userService.guardarUsuario(any(User.class)))
-                .thenAnswer(invocation -> {
-                    System.out.println("Método guardarUsuario invocado");
-
-                    User user = invocation.getArgument(0);
-                    // Simular la asignación de ID por la base de datos
-                    user.setId_usuario(1); // Supongamos que el ID asignado es 1
-                    System.out.println("Id del usuario" + user.getId_usuario());
-                    return Mono.just(user);
-                });
-
-        // Realizar la solicitud POST al endpoint
+        // Act & Assert
         webTestClient.post().uri("/api/users/admin/crear")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(testUser)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(User.class)
-                .value(user -> {
-                    // Verificar que los campos se establecen correctamente
-                    if (user != null) {
-                        assertEquals(1, user.getId_usuario()); // Verifica el ID asignado
-                    } else {
-                        fail("El usuario devuelto es nulo");
-                    }
-                    assert user.getUsername().equals(testUser.getUsername());
-                    assert user.getEmail().equals(testUser.getEmail());
-                    assert user.getPassword().equals(testUser.getPassword());
-                    assert user.getRole().equals(testUser.getRole());
-                    assert user.getActivo().equals(testUser.getActivo());
-                    assert user.getDireccion().equals(testUser.getDireccion());
-                    assert user.getNumero_telefono().equals(testUser.getNumero_telefono());
-                    // Verificar otros campos según sea necesario
+                .expectBody(UserResponse.class)
+                .value(userResponse -> {
+                    // Asegura que el estado de la respuesta sea OK y que el mensaje sea el esperado
+                    Assertions.assertThat(userResponse).isNotNull();
+                    Assertions.assertThat(userResponse.getStatus()).isEqualTo(HttpStatus.OK);
+                    Assertions.assertThat(userResponse.getMessage()).isEqualTo("Usuario creado exitosamente");
                 });
     }
 
