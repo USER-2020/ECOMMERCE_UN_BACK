@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.reactive.function.server.MockServerRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +30,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import universidad.ecommerce_universitario_mysql_webflux.entity.User;
+import universidad.ecommerce_universitario_mysql_webflux.response.UserResponse;
 import universidad.ecommerce_universitario_mysql_webflux.service.UserService;
 
 @SpringBootTest
@@ -43,33 +46,41 @@ public class UserHandlerTest {
     @InjectMocks
     private UserHandler userHandler;
 
-    String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9BRE1JTiIsInN1YiI6Ik5vbWJyZVVzdWFyaW8iLCJpYXQiOjE3MTA4NzgzNjEsImV4cCI6MTcxMDkwNzE2MX0._Bl_JUzQfmpJB8-LsXR7mhy_uNMogrT0Ti7lYTduT8uDdETZAO6WARSe48p1RzOrzbYnDzA9MBj6uL47P3TdAQ";
+    String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9BRE1JTiIsInN1YiI6Ik5vbWJyZVVzdWFyaW8iLCJpYXQiOjE3MTEwNTkyNTIsImV4cCI6MTcxMTA4ODA1Mn0._WdlIxfKzF-ZQu699bq9Y8ySAuHrR0qxgl6SJYcHv1ItzH4tFxnx_P7pvgU0ChHpkDgTUo6h-Lrs6yEzy6PEIg";
 
-    // @BeforeEach
-    // void setUp() {
-    // when(userService.guardarUsuario(any(User.class)))
-    // .thenReturn(Mono.just(testUser));
-    // }
+    @BeforeEach
+    void setUp() {
+        // Configurar el mock del servicio para devolver un Mono<User> con un usuario simulado
+        when(userService.guardarUsuario(any(User.class)))
+                .thenAnswer(invocation -> {
+                    User user = invocation.getArgument(0);
+                    // Simular la respuesta del servicio con el usuario guardado
+                    return Mono.just(user);
+                });
+    }
 
     @Test
     void testCreateUser() {
+        // Arrange
         User testUser = new User();
-        testUser.setUsername("testUser");
-        testUser.setEmail("test@example.com");
+        testUser.setUsername("testUserPrueba45");
+        testUser.setEmail("testPrueba656@example.com");
         testUser.setPassword("password123");
 
+        // Act & Assert
         webTestClient.post().uri("/api/users/admin/crear")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(testUser), User.class)
+                .bodyValue(testUser)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(User.class)
-                .value(user -> {
-                    assertEquals(testUser, user, "El usuario creado no coincide con el esperado");
+                .expectBody(UserResponse.class)
+                .value(userResponse -> {
+                    // Asegura que el estado de la respuesta sea OK y que el mensaje sea el esperado
+                    Assertions.assertThat(userResponse).isNotNull();
+                    Assertions.assertThat(userResponse.getStatus()).isEqualTo(HttpStatus.OK);
+                    Assertions.assertThat(userResponse.getMessage()).isEqualTo("Usuario creado exitosamente");
                 });
-
-        testUser.setId_usuario(1);
     }
 
     // @Test
