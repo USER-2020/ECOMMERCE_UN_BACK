@@ -36,9 +36,6 @@ public class User {
     @NotBlank(message = "Password  is obligatory")
     private String password;
 
-    // @Column("role")
-    // private Set<Role> role;
-
     @Getter
 	@Setter
     private String role;
@@ -55,4 +52,6 @@ public class User {
     @CreatedDate
     private LocalDate fecha_ingreso;
 
+
+    
 }
